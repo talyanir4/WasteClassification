@@ -69,6 +69,17 @@ st.subheader("Please Upload a waste image")
 # file uploader
 image = st.file_uploader("Please Upload a waste Image", type = ["jpg", "png", "jpeg"], accept_multiple_files = False, help = "Upload an Image")
 
+img_file_buffer = st.camera_input("Take a picture")
+
+if img_file_buffer is not None:
+    # Convert the image buffer to a PIL Image
+    img = Image.open(img_file_buffer)
+
+    # Save the image as a JPEG file
+    img.save("captured_image.jpg", format="JPEG")
+
+    st.success("Image saved as captured_image.jpg")
+    
 if image:
     user_image = Image.open(image)
     # save the image to set the path
