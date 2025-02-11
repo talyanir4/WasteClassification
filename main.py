@@ -80,7 +80,7 @@ if img_file_buffer is not None:
 
     st.success("Image saved as user_image.jpg")
 
-if image:
+if image or img_file_buffer:
     user_image = Image.open(image)
     # save the image to set the path
     user_image.save(IMAGE_NAME)
