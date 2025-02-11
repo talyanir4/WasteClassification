@@ -76,10 +76,10 @@ if img_file_buffer is not None:
     img = Image.open(img_file_buffer)
 
     # Save the image as a JPEG file
-    img.save("captured_image.jpg", format="JPEG")
+    img.save(IMAGE_NAME, format="JPEG")
 
-    st.success("Image saved as captured_image.jpg")
-    
+    st.success("Image saved as user_image.jpg")
+
 if image:
     user_image = Image.open(image)
     # save the image to set the path
