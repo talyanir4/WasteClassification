@@ -113,5 +113,5 @@ if image or camera_image:
         #model_predict = classification_model.predict(image_features)
         #result_label = CLASS_LABEL[model_predict[0]]
         results = contamination()
-        st.success(f"Prediction: {results}")
+        st.success(f"Contamination level: {results["status"]}, Prediction labels: {results["labels"]}")
 
