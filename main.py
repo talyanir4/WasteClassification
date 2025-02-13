@@ -7,6 +7,7 @@ import pickle
 from sklearn.neural_network import MLPClassifier
 from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.models import Model
+from collections import defaultdict
 
 # constants
 IMG_SIZE = (224, 224)
