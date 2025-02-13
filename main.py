@@ -69,16 +69,16 @@ def contamination():
     #print(image_name,pred_probs )
     # check contamination
     if (pred_probs[0] - pred_probs[1]) < CD1:
-        contamined_dict["image_name"].append(image_path)
+        contamined_dict["image_name"].append(IMAGE_NAME)
         contamined_dict["status"].append("Highly Contaminated")
         contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
 
     elif (pred_probs[0] - pred_probs[1]) >= CD1 and (pred_probs[0] - pred_probs[1]) < CD2:
-        contamined_dict["image_name"].append(image_path)
+        contamined_dict["image_name"].append(IMAGE_NAME)
         contamined_dict["status"].append("Low Contamination")
         contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
     else:
-        contamined_dict["image_name"].append(image_path)
+        contamined_dict["image_name"].append(IMAGE_NAME)
         contamined_dict["status"].append("Not Contaminated")
         contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
     
