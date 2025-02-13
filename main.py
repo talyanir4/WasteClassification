@@ -37,9 +37,52 @@ def featurization(image_path, model):
     predictions = model.predict(img_preprocessed)
     return predictions
 
+def extract_indexes(prob_list: list) -> tuple:
+    process_list = prob_list.copy()
+    # sort the list
+    process_list.sort(reverse = True)
+    first_prob, second_prob = process_list[0], process_list[1]
+    # get indexes
+    first_index = prob_list.index(first_prob)
+    second_index = prob_list.index(second_prob)
+
+
+    return ((first_prob, second_prob), (first_index, second_index))
+
 # Load models
 ConvNeXtXLarge_featurized_model = get_ConvNeXtXLarge_model()
 classification_model = load_sklearn_models("MLP_best_model.pkl")
+
+def contamination():
+    CD1 = 0.2
+    CD2 = 0.4
+
+    # contamination data
+    contamined_dict = defaultdict(list)
+    # get features
+    image_features = featurization(IMAGE_NAME, ConvNeXtXLarge_featurized_model)
+    # get probabilities
+    probs = classification_model.predict_proba(image_features)
+    # pred prbs
+    pred_probs, pred_index = extract_indexes(list(probs[0]))
+    #print(image_name,pred_probs )
+    # check contamination
+    if (pred_probs[0] - pred_probs[1]) < CD1:
+        contamined_dict["image_name"].append(image_path)
+        contamined_dict["status"].append("Highly Contaminated")
+        contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
+
+    elif (pred_probs[0] - pred_probs[1]) >= CD1 and (pred_probs[0] - pred_probs[1]) < CD2:
+        contamined_dict["image_name"].append(image_path)
+        contamined_dict["status"].append("Low Contamination")
+        contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
+    else:
+        contamined_dict["image_name"].append(image_path)
+        contamined_dict["status"].append("Not Contaminated")
+        contamined_dict["labels"].append(f"{LABELS[pred_index[0]]} and {LABELS[pred_index[1]]}")
+    
+    return contamined_dict
+
 
 # Web app UI
 st.title("Waste Classification")
@@ -65,7 +108,9 @@ if image or camera_image:
 
     # Extract features and classify
     with st.spinner("Processing..."):
-        image_features = featurization(IMAGE_NAME, ConvNeXtXLarge_featurized_model)
-        model_predict = classification_model.predict(image_features)
-        result_label = CLASS_LABEL[model_predict[0]]
-        st.success(f"Prediction: {result_label}")
+        #image_features = featurization(IMAGE_NAME, ConvNeXtXLarge_featurized_model)
+        #model_predict = classification_model.predict(image_features)
+        #result_label = CLASS_LABEL[model_predict[0]]
+        results = contamination()
+        st.success(f"Prediction: {results}")
+
