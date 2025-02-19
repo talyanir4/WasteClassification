@@ -9,7 +9,7 @@ from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.models import Model
 from collections import defaultdict
 
-# constants
+# Constants
 IMG_SIZE = (224, 224)
 IMG_ADDRESS = "https://static.vecteezy.com/system/resources/previews/004/341/571/non_2x/waste-management-eco-friendly-living-2d-web-banner-poster-garbage-separation-man-and-woman-sorting-trash-flat-characters-on-cartoon-background-printable-patches-colorful-web-elements-vector.jpg"
 IMAGE_NAME = "user_image.png"
@@ -40,14 +40,10 @@ def featurization(image_path, model):
 
 def extract_indexes(prob_list: list) -> tuple:
     process_list = prob_list.copy()
-    # sort the list
-    process_list.sort(reverse = True)
+    process_list.sort(reverse=True)
     first_prob, second_prob = process_list[0], process_list[1]
-    # get indexes
     first_index = prob_list.index(first_prob)
     second_index = prob_list.index(second_prob)
-
-
     return ((first_prob, second_prob), (first_index, second_index))
 
 # Load models
@@ -57,61 +53,64 @@ classification_model = load_sklearn_models("MLP_best_model.pkl")
 def contamination():
     CD1 = 0.2
     CD2 = 0.4
-
-    # contamination data
     contamined_dict = defaultdict(list)
-    # get features
     image_features = featurization(IMAGE_NAME, ConvNeXtXLarge_featurized_model)
-    # get probabilities
     probs = classification_model.predict_proba(image_features)
-    # pred prbs
     pred_probs, pred_index = extract_indexes(list(probs[0]))
-    #print(image_name,pred_probs )
-    # check contamination
-    if (pred_probs[0] - pred_probs[1]) < CD1:
-        contamined_dict["image_name"].append(IMAGE_NAME)
-        contamined_dict["status"].append("Highly Contaminated")
-        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
 
+    if (pred_probs[0] - pred_probs[1]) < CD1:
+        contamined_dict["status"].append("Highly Contaminated")
     elif (pred_probs[0] - pred_probs[1]) >= CD1 and (pred_probs[0] - pred_probs[1]) < CD2:
-        contamined_dict["image_name"].append(IMAGE_NAME)
         contamined_dict["status"].append("Low Contamination")
-        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
     else:
-        contamined_dict["image_name"].append(IMAGE_NAME)
         contamined_dict["status"].append("Not Contaminated")
-        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
-    
+
+    contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
     return contamined_dict
 
+# Initialize session state for history
+if "history" not in st.session_state:
+    st.session_state.history = []
 
-# Web app UI
-st.title("Waste Classification")
-st.image(IMG_ADDRESS, caption="Waste Classification")
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["About", "Sort", "History"])
 
-st.subheader("Upload or Capture an Image")
+if page == "Sort":
+    st.title("Waste Classification")
+    st.image(IMG_ADDRESS, caption="Waste Classification")
+    st.subheader("Upload or Capture an Image")
 
-# File uploader
-image = st.file_uploader("Upload a Waste Image", type=["jpg", "png", "jpeg"])
+    image = st.file_uploader("Upload a Waste Image", type=["jpg", "png", "jpeg"])
+    camera_image = st.camera_input("Or Take a Photo")
 
-# Camera input
-camera_image = st.camera_input("Or Take a Photo")
+    if image or camera_image:
+        user_image = Image.open(image if image else camera_image)
+        user_image.save(IMAGE_NAME)
+        st.image(user_image, caption="Selected Image")
 
-# Process image from either source
-if image or camera_image:
-    user_image = Image.open(image if image else camera_image)
+        with st.spinner("Processing..."):
+            results = contamination()
+            st.success(f"Contamination level: {results['status'][0]}, Prediction labels: {results['labels'][0]}")
 
-    # Save image to use in featurization
-    user_image.save(IMAGE_NAME)
+            # Save result to history
+            st.session_state.history.append({
+                "image": IMAGE_NAME,
+                "status": results['status'][0],
+                "labels": results['labels'][0]
+            })
 
-    # Display the user image
-    st.image(user_image, caption="Selected Image")
+elif page == "History":
+    st.title("History")
+    if st.session_state.history:
+        for record in st.session_state.history:
+            st.write(f"**Image:** {record['image']}")
+            st.write(f"**Contamination Level:** {record['status']}")
+            st.write(f"**Prediction Labels:** {record['labels']}")
+            st.write("---")
+    else:
+        st.write("No history available.")
 
-    # Extract features and classify
-    with st.spinner("Processing..."):
-        #image_features = featurization(IMAGE_NAME, ConvNeXtXLarge_featurized_model)
-        #model_predict = classification_model.predict(image_features)
-        #result_label = CLASS_LABEL[model_predict[0]]
-        results = contamination()
-        st.success(f"Contamination level: {results["status"][0]}, Prediction labels: {results["labels"][0]}")
-
+elif page == "About":
+    st.title("About")
+    st.write("This application classifies waste images using deep learning and machine learning techniques.")
