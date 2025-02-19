@@ -97,17 +97,18 @@ if page == "Sort":
             st.session_state.history.append({
                 "image": IMAGE_NAME,
                 "status": results['status'][0],
-                "labels": results['labels'][0]
+                "labels": results['labels'][0],
+                "image_data": user_image
             })
 
 elif page == "History":
     st.title("History")
     if st.session_state.history:
-        for record in st.session_state.history:
-            st.write(f"**Image:** {record['image']}")
-            st.write(f"**Contamination Level:** {record['status']}")
-            st.write(f"**Prediction Labels:** {record['labels']}")
-            st.write("---")
+        for index, record in enumerate(st.session_state.history):
+            with st.expander(f"Prediction {index+1}"):
+                st.image(record["image_data"], caption=f"Prediction {index+1}")
+                st.write(f"**Contamination Level:** {record['status']}")
+                st.write(f"**Prediction Labels:** {record['labels']}")
     else:
         st.write("No history available.")
 
