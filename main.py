@@ -1,6 +1,7 @@
 import streamlit as st
 import tensorflow as tf
 import numpy as np
+import time
 from tensorflow.keras.applications.resnet import preprocess_input
 from PIL import Image
 import pickle
@@ -84,6 +85,8 @@ if page == "Sort":
     image = st.file_uploader("Upload a Waste Image", type=["jpg", "png", "jpeg"])
     camera_image = st.camera_input("Or Take a Photo")
 
+    current_time = time.time()
+
     if image or camera_image:
         user_image = Image.open(image if image else camera_image)
         user_image.save(IMAGE_NAME)
@@ -92,7 +95,9 @@ if page == "Sort":
         with st.spinner("Processing..."):
             results = contamination()
             st.success(f"Contamination level: {results['status'][0]}, Prediction labels: {results['labels'][0]}")
-
+            pred_time = time.time()
+            lag = pred_time - current_time
+            st.success(f"Prediction Time: {lag}")
             # Save result to history
             st.session_state.history.append({
                 "image": IMAGE_NAME,
