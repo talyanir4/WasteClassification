@@ -78,7 +78,7 @@ st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["About", "Sort", "History"])
 
 if page == "Sort":
-    st.title("Waste Classification")
+    st.title("RecycleSense AI")
     st.image(IMG_ADDRESS, caption="Waste Classification")
     st.subheader("Upload or Capture an Image")
 
@@ -119,4 +119,4 @@ elif page == "History":
 
 elif page == "About":
     st.title("About")
-    st.write("This application classifies waste images using deep learning and machine learning techniques.")
+    st.write("RecycleSense AI uses machine learning and visual recognition to sort waste and detect contamination, optimizing recycling accuracy and reducing greenhouse gas emissions. It deploys a multilayer perceptron (MLP) deep learning model for efficient waste sorting that can be implemented at materials recovery facilities.")
