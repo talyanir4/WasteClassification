@@ -61,12 +61,14 @@ def contamination():
 
     if (pred_probs[0] - pred_probs[1]) < CD1:
         contamined_dict["status"].append("Highly Contaminated")
+        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
     elif (pred_probs[0] - pred_probs[1]) >= CD1 and (pred_probs[0] - pred_probs[1]) < CD2:
         contamined_dict["status"].append("Low Contamination")
+        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
     else:
         contamined_dict["status"].append("Not Contaminated")
+        contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]}")
 
-    contamined_dict["labels"].append(f"{CLASS_LABEL[pred_index[0]]} and {CLASS_LABEL[pred_index[1]]}")
     return contamined_dict
 
 # Initialize session state for history
